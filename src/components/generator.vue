@@ -3,11 +3,6 @@ import { ref } from 'vue';
 import Options from '../types/Options.interface';
 import Characters from '../types/Characters.interface';
 
-// const lowercaseCharacters: string[] = ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p", "a", "s", "d", "f", "g", "h", "j", "k", "l", "z", "x", "c", "v", "b", "n", "m"]
-// const uppercaseCharacters: string[] = ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", "A", "S", "D", "F", "G", "H", "J", "K", "L", "Z", "X", "C", "V", "B", "N", "M"]
-// const symbols: string[] = ["!", "@", "#", "$", "%", "^", "&", "*"]
-// const numbers: string[] = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0"]
-// const ambiguousCharacters: string[] = ["~", "`", "(", ")", "{", "}", "[", "]", ".", ",", ":", ";"]
 const characters: Characters = {
     lowercaseCharacters: ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p", "a", "s", "d", "f", "g", "h", "j", "k", "l", "z", "x", "c", "v", "b", "n", "m"],
     uppercaseCharacters: ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", "A", "S", "D", "F", "G", "H", "J", "K", "L", "Z", "X", "C", "V", "B", "N", "M"],
@@ -16,8 +11,9 @@ const characters: Characters = {
     ambiguousCharacters: ["~", "`", "(", ")", "{", "}", "[", "]", ".", ",", ":", ";"],
 }
 
+const passwordElement = ref<any>()
 const selectedCharacters = ref<string[]>([])
-const password = ref<string>()
+const password = ref<string>("")
 const passwordLength = ref<number>(7)
 const options = ref<Options>({
     symbols: {
@@ -42,16 +38,13 @@ const options = ref<Options>({
     }
 })
 
-// function generate() {
-//     for (const [optionKey, optionValue] of Object.entries(options.value)) {
-//         if (optionValue.value) {
-//             selectedCharacters.value.push(characters[optionKey])
-//         }
-//     }
-// }
+function RandomNumber(start: number, end: number) {
+    return Math.floor(Math.random() * (end - start + 1)) + start;
+}
 
 function generate() {
     selectedCharacters.value = []
+    password.value = ""
 
     for (const [optionKey, optionValue] of Object.entries(options.value)) {
         if (optionValue.value) {
@@ -59,16 +52,26 @@ function generate() {
         }
     }
 
-    console.log(selectedCharacters.value);
-    
+    for (let i = 0; i <= passwordLength.value; i++) {
+        const randomCharacter: string = selectedCharacters.value[RandomNumber(0, selectedCharacters.value.length - 1)]
+        console.log(randomCharacter);
+
+        password.value += randomCharacter
+    }
+}
+
+function copyPassword() {
+    passwordElement.value?.focus()
+    passwordElement.value?.select();
+    document.execCommand('copy');
 }
 </script>
 
 <template>
     <div class="w-[20rem] bg-zinc-950 p-4 rounded-xl shadow-xl ">
         <div class="grid grid-cols-12 gap-2">
-            <input type="text" class="h-10 col-span-10 bg-white rounded-xl px-2" :disabled="!password">
-            <div class="h-10 col-span-2 bg-white rounded-xl p-2 cursor-pointer select-none">
+            <input type="text" v-model="password" ref="passwordElement" class="h-10 col-span-10 bg-white rounded-xl px-2" :disabled="!password">
+            <div @click="copyPassword()" class="h-10 col-span-2 bg-white rounded-xl p-2 cursor-pointer select-none">
                 <img src="./../assets/copy-svgrepo-com.svg" alt="">
             </div>
         </div>
@@ -89,7 +92,7 @@ function generate() {
                 </div>
             </div>
             <div class="col-span-10">
-                <button @click="generate" class="py-2 bg-blue-600 w-full rounded-xl text-white">
+                <button @click="generate()" class="py-2 bg-blue-600 w-full rounded-xl text-white">
                     Generate
                 </button>
             </div>
